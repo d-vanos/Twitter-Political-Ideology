@@ -22,18 +22,16 @@
 # Libraries
 library(tidyverse)
 library(rtweet)
+library(googlesheets4)
+
+token <- read_rds("scripts/googlesheets_token.rds")
+gs4_auth(token = token)
 
 # Import datasets
-social <- read_csv("data/SPSP_Clean.csv")
-bio <- read_csv("data/EvolDir_Clean.csv")
-evo <- read_csv("data/HBES_Clean.csv")
+social <- read_csv("data/2 - clean/SPSP_Clean.csv")
+bio <- read_csv("data/2 - clean/EvolDir_Clean.csv")
+evo <- read_csv("data/2 - clean/HBES_Clean.csv")
 
-# add columns
-# evo <- evo %>%
-#   mutate(Twitter_Handle = "",
-#          Twitter_Bio = "",
-#          Twitter_Name = "",
-#          Results = NA)
 
 ##################################-
 ##### Creating the dictionary ####
@@ -44,37 +42,39 @@ evo <- read_csv("data/HBES_Clean.csv")
 # prevent words such as 'community' being matched
 
 dictionary <- c(" uni ",
-                          " university ",
-                          " academia",
-                          " Dr ",
-                          " PhD ",
-                          " Professor ",
-                          " Researcher ",
-                          " Research ",
-                          " Academic ",
-                          " Science ",
-                          " Lab ",
-                          " Laboratory ",
-                          " Scientist ",
-                          " Research ",
-                          " Psychologist ",
-                          " Biologist ",
-                          " Lecturer ",
-                          " Prof ",
-                          " Prof. ",
-                          " Doctor ",
-                          " Postdoc ",
-                          " Researching ",
-                          " Psychology ",
-                          " Biology ",
-                          " Social Psychology ",
-                          " Evolutionary Biology ",
-                          " Evolutionary Psychology ",
-                          " graduate student ",
-                          " grad student ",
-                          " Behavioral ",
-                          " Behavioural ",
-                          " Biological ")
+                " university ",
+                " academia",
+                " Dr ",
+                " Dr. ",
+                " PhD ",
+                " PhD. ",
+                " Professor ",
+                " Researcher ",
+                " Research ",
+                " Academic ",
+                " Science ",
+                " Lab ",
+                " Laboratory ",
+                " Scientist ",
+                " Research ",
+                " Psychologist ",
+                " Biologist ",
+                " Lecturer ",
+                " Prof ",
+                " Prof. ",
+                " Doctor ",
+                " Postdoc ",
+                " Researching ",
+                " Psychology ",
+                " Biology ",
+                " Social Psychology ",
+                " Evolutionary Biology ",
+                " Evolutionary Psychology ",
+                " graduate student ",
+                " grad student ",
+                " Behavioral ",
+                " Behavioural ",
+                " Biological ")
 
 # Adding version with no white space, then collapsing so it is one long string for grepl()
 #dictionary <- c(dictionary, trimws(dictionary))
@@ -139,7 +139,7 @@ extract_user <- function(data, data_row)  {
   }
   
   # Check bio against dictionary
-  user$dict_match <- grepl(dictionary, user$description)
+  user$dict_match <- grepl(toupper(dictionary), toupper(user$description)) # 'toupper' prevents capitalisation being an issue
   
   return(user)
 }
@@ -147,7 +147,7 @@ extract_user <- function(data, data_row)  {
 
 
 
-# To select the correct user (the one that matched the dictionary) #
+# To select the correct user (the one that matched the dictionary) 
 correct_user <- function(data, data_row, user){
   
   # if 0 handles returned 
@@ -185,12 +185,30 @@ correct_user <- function(data, data_row, user){
 }
 
 
+
 # Extracting twitter handles and adding them to dataset
 add_user <- function(data){
-  for (data_row in 1:nrow(data)){
-  tryCatch({
-    user <- extract_user(data, data_row)
-    data <- correct_user(data, data_row, user)
+  data_row = 1
+  while (data_row < nrow(data)){
+    tryCatch({
+      # Extract user and match to dictionary 
+      user <- extract_user(data, data_row)
+      data <- correct_user(data, data_row, user)
+      
+      # Pause the loop if we reached the API limit
+      # Twitter limits the number of users you can extract to 900 every 15 minutes, so this needs to be accounted for
+      # Every 10 rows: 
+      if(data_row %% 10 == 0) { 
+        rate <- rate_limit() %>% filter(query == "users/search") # get info on how many users you can search 
+        print(paste0("Remaining: ", rate$remaining))
+        print(paste0("Minutes until reset: ", as.numeric(round(rate$reset, 2)), " mins"))
+        print(paste0("User limits will reset at: ", rate$reset_at))
+        if(rate$remaining == 0) { 
+          data_row = data_row - 11 # Go back 10 (-1 because one added below) to make sure we haven't missed anyone 
+          Sys.sleep(time = as.numeric(round(rate$reset, 1) * 60)) # Stop the loop until the rate resets
+          } 
+      }
+      data_row = data_row + 1
   },
 
     # printing errors
@@ -203,12 +221,35 @@ add_user <- function(data){
   return(data)
 }
 
-
-
 # Run functions 
-evo <- add_user(evo)
-social <- add_user(social)
-bio <- add_user(bio)
+evo_extracted <- add_user(evo)
+social_extracted <- add_user(social)
+bio_extracted <- add_user(bio)
+
+# Save 
+# CSV
+write_csv(x = evo_extracted, path = "data/hbes_2_extract_user.csv")
+write_csv(x = social_extracted, path = "data/spsp_2_extract_user.csv")
+write_csv(x = bio_extracted, path = "data/evoldir_2_extract_user.csv")
+
+# RDS
+saveRDS(evo_extracted, file = "data/hbes_2_extract_user.rds")
+saveRDS(social_extracted, file = "data/spsp_2_extract_user.rds")
+saveRDS(bio_extracted, file = "data/evoldir_2_extract_user.rds")
+
+# Googlesheets
+# Remove previous version
+gs4_find("hbes_2_extract_user") %>% 
+  googledrive::drive_trash()
+gs4_find("spsp_2_extract_user") %>% 
+  googledrive::drive_trash()
+gs4_find("evoldir_2_extract_user") %>% 
+  googledrive::drive_trash()
+
+# Add new versions 
+gs4_create(name = "hbes_2_extract_user", sheets = evo_extracted)
+gs4_create(name = "spsp_2_extract_user", sheets = social_extracted)
+gs4_create(name = "evoldir_2_extract_user", sheets = bio_extracted)
 
 
 
