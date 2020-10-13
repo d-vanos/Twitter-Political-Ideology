@@ -52,7 +52,7 @@ for (row in 1:nrow(HBES)){
 
 
 # spread
-HBES <- pivot_wider(HBES, names_from = "Type", values_from = "Data")
+HBES <- pivot_wider(HBES, names_from = "Type", member_lists_from = "Data")
 
 HBES <- HBES %>%
   select(ID, Name, Country, Discipline)
@@ -102,63 +102,123 @@ write_csv(Bio, "Data/EvolDir_Clean.csv", na = "")
 #### SPSP Members ####
 ######################-
 
-SPSP <- read_csv("Data/SPSP_200_Members.csv", skip_empty_rows = FALSE)
+social <- read_csv("data/1 - original/SPSP.csv", skip_empty_rows = FALSE)
 
-SPSP <- SPSP %>%
-  mutate(Category = NA, ID = NA) %>%
-  select(ID, Category, Value)
+social <- social %>%
+  mutate(category = "", ID = as.numeric(NA)) %>%
+  select(ID, category, member_list)
 
-for(row in 1:nrow(SPSP)){
+# add IDs and category labels 
+row = 1
+while(row <= nrow(social)){
+  social[row, "category"] = "name"
+  social[row, "ID"] = row
+  row = row + 1
+  social[row, "category"] = "country"
+  social[row, "ID"] = row - 1
+  row = row + 3
+}
+
+# Remove empty rows
+social <- social %>% 
+  filter(!is.na(ID), !is.na(member_list))
+
+# Transpose
+social <- pivot_wider(social, names_from = "category", values_from = "member_list")
+
+# Remove duplicates
+social <- social %>% 
+  select(-ID) %>% 
+  distinct()
+
+# write csv
+write_csv(social, "Data/social_2_clean.csv", na = "")
+
+
+
+
+
+
+
+
+
+## Irrelevant:
+for(row in 1:nrow(social)){
   # for those who have an email address
-  if (!is.na(SPSP[row, "Value"]) &&
-      !is.na(SPSP[row + 1, "Value"]) &&
-      !is.na(SPSP[row + 2, "Value"]) &&
-      !is.na(SPSP[row + 3, "Value"])){
-    SPSP[row, "Category"] = "Name"
-    SPSP[row + 1, "Category"] = "Email"
-    SPSP[row + 2, "Category"] = "Place"
-    SPSP[row + 3, "Category"] = "Country"
+  if (!is.na(social[row, "member_list"]) &&
+      !is.na(social[row + 1, "member_list"]) &&
+      !is.na(social[row + 2, "member_list"]) &&
+      !is.na(social[row + 3, "member_list"])){
+    social[row, "category"] = "Name"
+    social[row + 1, "category"] = "Email"
+    social[row + 2, "category"] = "Place"
+    social[row + 3, "category"] = "Country"
   }
   # for those without email
-  else if(is.na(SPSP[row - 1, "Value"]) &&
-      !is.na(SPSP[row, "Value"]) &&
-      !is.na(SPSP[row + 1, "Value"]) &&
-      !is.na(SPSP[row + 2, "Value"]) &&
-      is.na(SPSP[row + 3, "Value"])){
-    SPSP[row, "Category"] = "Name"
-    SPSP[row + 1, "Category"] = "Place"
-    SPSP[row + 2, "Category"] = "Country"
+  else if(is.na(social[row - 1, "member_list"]) &&
+          !is.na(social[row, "member_list"]) &&
+          !is.na(social[row + 1, "member_list"]) &&
+          !is.na(social[row + 2, "member_list"]) &&
+          is.na(social[row + 3, "member_list"])){
+    social[row, "category"] = "Name"
+    social[row + 1, "category"] = "Place"
+    social[row + 2, "category"] = "Country"
+  }
+}
+
+
+
+for(row in 1:nrow(social)){
+  # for those who have an email address
+  if (!is.na(social[row, "member_list"]) &&
+      !is.na(social[row + 1, "member_list"]) &&
+      !is.na(social[row + 2, "member_list"]) &&
+      !is.na(social[row + 3, "member_list"])){
+    social[row, "category"] = "Name"
+    social[row + 1, "category"] = "Email"
+    social[row + 2, "category"] = "Place"
+    social[row + 3, "category"] = "Country"
+  }
+  # for those without email
+  else if(is.na(social[row - 1, "member_list"]) &&
+          !is.na(social[row, "member_list"]) &&
+          !is.na(social[row + 1, "member_list"]) &&
+          !is.na(social[row + 2, "member_list"]) &&
+          is.na(social[row + 3, "member_list"])){
+    social[row, "category"] = "Name"
+    social[row + 1, "category"] = "Place"
+    social[row + 2, "category"] = "Country"
   }
 }
 
 # check for NAs
-SPSP %>%
-  filter(is.na(Category) & (!is.na(Value)))
+social %>%
+  filter(is.na(category) & (!is.na(member_list)))
 
 # Add IDs
 ID = 0
 
-for (row in 1:nrow(SPSP)){
-  if(is.na(SPSP[row - 1, "Value"]) &&
-     !is.na(SPSP[row, "Value"]) &&
-     !is.na(SPSP[row + 1, "Value"]) &&
-     !is.na(SPSP[row + 2, "Value"])){
+for (row in 1:nrow(social)){
+  if(is.na(social[row - 1, "member_list"]) &&
+     !is.na(social[row, "member_list"]) &&
+     !is.na(social[row + 1, "member_list"]) &&
+     !is.na(social[row + 2, "member_list"])){
     ID = ID + 1
-    SPSP[row, "ID"] = ID
-    SPSP[row + 1, "ID"] = ID
-    SPSP[row + 2, "ID"] = ID
-    SPSP[row + 3, "ID"] = ID
+    social[row, "ID"] = ID
+    social[row + 1, "ID"] = ID
+    social[row + 2, "ID"] = ID
+    social[row + 3, "ID"] = ID
   }
 }
 
 
 # remove rows with all NAs
-SPSP <- SPSP %>%
-  filter(!is.na(Category) & (!is.na(Value)))
+social <- social %>%
+  filter(!is.na(category) & (!is.na(member_list)))
 
 # Transpose
-SPSP <- pivot_wider(SPSP, names_from = "Category", values_from = "Value")
+social <- pivot_wider(social, names_from = "category", member_lists_from = "member_list")
 
-# write csv
-write_csv(SPSP, "Data/SPSP_Clean.csv", na = "")
+
+
 
