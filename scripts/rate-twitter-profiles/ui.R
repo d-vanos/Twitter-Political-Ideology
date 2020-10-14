@@ -37,14 +37,14 @@ In this task you are asked to make a decision about which of a list of twitter u
 academic).based on their twitter bio and whether their twitter name matches the HBES list name. There may be cases where there is only one user. In that case,
 simply decide whether that person is an evolutionary psychologist. If none of the twitter users appear to be an evolutionary psychologists, or if you are 
 unsure, simply press 'Next'. If you accidentally select a user, click on their name again to deselect. Your current selection will be displayed under the 
-table. You can use the 'Back' and 'Next' buttons to toggle through the users."
+table. You can use the 'Back' and 'Next' buttons to toggle through the users. <br> <br>"
 
 evo_text_info <- "<h4> How this dataset was created </h4>
 This dataset was created by searching for users whose name matched (according to Twitter's search algorithm) with a name in the HBES list. This list was 
 refined by filtering out users whose Twitter bios did not match at least one 'academic' keyword (e.g., evolution, academic, research, PhD, Dr, etc.).
 Sometimes, more than one person matched both these criteria (came up in the search, and had an academic keyword). Other times, people whose name did not 
 match the HBES list were still extracted, due to the way Twitter searches. Last, some extracted users are not academics, even though they matched one of 
-the keywords. Hence, this task is to make sure that the final dataset consists only of evolutionary psychologists."
+the keywords. Hence, this task is to make sure that the final dataset consists only of evolutionary psychologists. <br> <br>"
 
 bio_text <- "<h3> Instructions - Biology Dataset </h3>
 In this task you are asked to make a decision about whether a twitter bio belongs to a biologist (e.g., researcher, academic). If you believe the twitter
@@ -79,9 +79,19 @@ shinyUI(fluidPage(
                          HTML(info_text)),
                 tabPanel("Evo dataset",
                          HTML(evo_text_instructions),
-                         HTML(evo_text_info)),
+                         actionButton("decrease", "Back"), 
+                         actionButton("increase", "Next"),
+                         DT::dataTableOutput("evo_table"),
+                         textOutput("count"),
+                         HTML(evo_text_info),
+                         downloadButton("downloadData", "Download")),
+                
+                
+                
                 tabPanel("Bio dataset",
                          HTML(bio_text)),
+                
+                
                 tabPanel("Social psych dataset",
                          HTML(social_text)))
     )
