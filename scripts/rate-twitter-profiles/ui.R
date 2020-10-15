@@ -1,11 +1,4 @@
-#
-# This is the user-interface definition of a Shiny web application. You can
-# run the application by clicking 'Run App' above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
+
 
 library(shiny)
 
@@ -37,14 +30,24 @@ In this task you are asked to make a decision about which of a list of twitter u
 academic).based on their twitter bio and whether their twitter name matches the HBES list name. There may be cases where there is only one user. In that case,
 simply decide whether that person is an evolutionary psychologist. If none of the twitter users appear to be an evolutionary psychologists, or if you are 
 unsure, simply press 'Next'. If you accidentally select a user, click on their name again to deselect. Your current selection will be displayed under the 
-table. You can use the 'Back' and 'Next' buttons to toggle through the users. <br> <br>"
+table. You can use the 'Back' and 'Next' buttons to toggle through the users. <br> <br>
 
-evo_text_info <- "<h4> How this dataset was created </h4>
+<ul> Based on their twitter bio: 
+<li> <b> If 1 option: </b> Is this an evolutionary psychologist? 
+<li> <b> If 2+ options: </b> Which person, if any, is an evolutionary psychologist?
+</ul>
+
+<br> <br>"
+
+evo_text_info <- "<br> <h4> How this dataset was created </h4>
 This dataset was created by searching for users whose name matched (according to Twitter's search algorithm) with a name in the HBES list. This list was 
 refined by filtering out users whose Twitter bios did not match at least one 'academic' keyword (e.g., evolution, academic, research, PhD, Dr, etc.).
 Sometimes, more than one person matched both these criteria (came up in the search, and had an academic keyword). Other times, people whose name did not 
 match the HBES list were still extracted, due to the way Twitter searches. Last, some extracted users are not academics, even though they matched one of 
-the keywords. Hence, this task is to make sure that the final dataset consists only of evolutionary psychologists. <br> <br>"
+the keywords. Hence, this task is to make sure that the final dataset consists only of evolutionary psychologists. <br> <br>
+
+Concerned about issues with the data entry? <a href='https://docs.google.com/spreadsheets/d/1rqghfdHF3ybOcnwI75O3Dsu-i_j8fIG0jCHL48zLJbc/edit?usp=sharing'>
+See the raw dataset here.</a> <br><br> "
 
 bio_text <- "<h3> Instructions - Biology Dataset </h3>
 In this task you are asked to make a decision about whether a twitter bio belongs to a biologist (e.g., researcher, academic). If you believe the twitter
@@ -79,11 +82,14 @@ shinyUI(fluidPage(
                          HTML(info_text)),
                 tabPanel("Evo dataset",
                          HTML(evo_text_instructions),
-                         actionButton("decrease", "Back"), 
-                         actionButton("increase", "Next"),
+                         column(12, align = "center",
+                                actionButton("decrease", "Back"), 
+                                actionButton("increase", "Next")
+                                ),
                          DT::dataTableOutput("evo_table"),
                          textOutput("count"),
                          HTML(evo_text_info),
+                         actionButton("upload", "Manual Upload"),
                          downloadButton("downloadData", "Download")),
                 
                 
