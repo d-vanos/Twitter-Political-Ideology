@@ -111,10 +111,10 @@ social <- social %>%
 # add IDs and category labels 
 row = 1
 while(row <= nrow(social)){
-  social[row, "category"] = "name"
+  social[row, "category"] = "Name"
   social[row, "ID"] = row
   row = row + 1
-  social[row, "category"] = "country"
+  social[row, "category"] = "Country"
   social[row, "ID"] = row - 1
   row = row + 3
 }
@@ -132,92 +132,10 @@ social <- social %>%
   distinct()
 
 # write csv
-write_csv(social, "Data/social_2_clean.csv", na = "")
+write_csv(social, "data/2 - clean/social_2_clean.csv", na = "")
+saveRDS(social, "data/2 - clean/social_2_clean.rds")
 
 
-
-
-
-
-
-
-
-## Irrelevant:
-for(row in 1:nrow(social)){
-  # for those who have an email address
-  if (!is.na(social[row, "member_list"]) &&
-      !is.na(social[row + 1, "member_list"]) &&
-      !is.na(social[row + 2, "member_list"]) &&
-      !is.na(social[row + 3, "member_list"])){
-    social[row, "category"] = "Name"
-    social[row + 1, "category"] = "Email"
-    social[row + 2, "category"] = "Place"
-    social[row + 3, "category"] = "Country"
-  }
-  # for those without email
-  else if(is.na(social[row - 1, "member_list"]) &&
-          !is.na(social[row, "member_list"]) &&
-          !is.na(social[row + 1, "member_list"]) &&
-          !is.na(social[row + 2, "member_list"]) &&
-          is.na(social[row + 3, "member_list"])){
-    social[row, "category"] = "Name"
-    social[row + 1, "category"] = "Place"
-    social[row + 2, "category"] = "Country"
-  }
-}
-
-
-
-for(row in 1:nrow(social)){
-  # for those who have an email address
-  if (!is.na(social[row, "member_list"]) &&
-      !is.na(social[row + 1, "member_list"]) &&
-      !is.na(social[row + 2, "member_list"]) &&
-      !is.na(social[row + 3, "member_list"])){
-    social[row, "category"] = "Name"
-    social[row + 1, "category"] = "Email"
-    social[row + 2, "category"] = "Place"
-    social[row + 3, "category"] = "Country"
-  }
-  # for those without email
-  else if(is.na(social[row - 1, "member_list"]) &&
-          !is.na(social[row, "member_list"]) &&
-          !is.na(social[row + 1, "member_list"]) &&
-          !is.na(social[row + 2, "member_list"]) &&
-          is.na(social[row + 3, "member_list"])){
-    social[row, "category"] = "Name"
-    social[row + 1, "category"] = "Place"
-    social[row + 2, "category"] = "Country"
-  }
-}
-
-# check for NAs
-social %>%
-  filter(is.na(category) & (!is.na(member_list)))
-
-# Add IDs
-ID = 0
-
-for (row in 1:nrow(social)){
-  if(is.na(social[row - 1, "member_list"]) &&
-     !is.na(social[row, "member_list"]) &&
-     !is.na(social[row + 1, "member_list"]) &&
-     !is.na(social[row + 2, "member_list"])){
-    ID = ID + 1
-    social[row, "ID"] = ID
-    social[row + 1, "ID"] = ID
-    social[row + 2, "ID"] = ID
-    social[row + 3, "ID"] = ID
-  }
-}
-
-
-# remove rows with all NAs
-social <- social %>%
-  filter(!is.na(category) & (!is.na(member_list)))
-
-# Transpose
-social <- pivot_wider(social, names_from = "category", member_lists_from = "member_list")
 
 
 
