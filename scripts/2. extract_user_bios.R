@@ -27,7 +27,7 @@ library(tidyverse)
 library(googlesheets4)
 library(gender)
 library(rtweet)
-library(ggmap) # for location
+
 
 # To install genderdata (a requirement for gender) you can use this installer:
 # install.packages("genderdata", type = "source", repos = "http://packages.ropensci.org")
@@ -41,8 +41,6 @@ options(
 )
 
 sheets_auth()
-
-register_google(key = "AIzaSyDd2A2sNOFvYqp1TmmnKKqe4hV8MAIbeFk")
 
 twitter_token <- read_rds("twitter_token.rds")
 
@@ -211,10 +209,6 @@ evo_extracted <- add_user(evo)
 social_extracted <- add_user(social)
 bio_extracted <- add_user(bio)
 
-# REMOVE THIS!!
-# evo_extracted <- read_csv("data/3 - users extracted/hbes_3_extract_user.csv")
-# social_extracted <- read_csv("data/3 - users extracted/spsp_3_extract_user.csv")
-# bio_extracted <- read_csv("data/3 - users extracted/evoldir_3_extract_user.csv")
 # Remove people who don't have twitter and spread out multiple hits into separate rows
 filter_and_spread <- function(data){
   data %>%
