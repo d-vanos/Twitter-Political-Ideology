@@ -48,3 +48,22 @@ Sample size:
 
 * Number extracted from HBES: **579**
 * Matching Twitter names: **336 (-243)**
+
+## R Script Summaries
+
+### 1. data_cleaning.R
+This script takes the raw names, countries, and text copied from the databases and converts it into tidy datasets that are easier to work with. 
+
+### 2. extract_user_bios.R
+In this script, the names extracted from the databases is searched on Twitter. Any matches are saved, and Twitter bios are searched to determine if they contain any keywords 
+that might indicate that they are an academic (e.g., academia, PhD, researcher). Other info extracted includes the number of friends, followers, Twitter location,
+account creation date, and number of twitter posts. Their likely gender (based on historical name data) is added. The Twitter API only permits 900 requests per 15 minutes, 
+so the script pauses once this limit is reached and starts again when the limit resets. Where there are multiple results, these are saved as separate rows. The data are
+saved as csv files and google sheet files, ready to be manually rated using a Shiny app.
+
+### 3. add_location.R
+Twitter locations, where they exist, can include countries, cities, or suburbs. The Google Maps API is used to standardize location by extracting latitude, longitude, 
+and country from location data. 
+
+
+
