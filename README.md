@@ -81,8 +81,18 @@ results, these are saved as separate rows. The data are saved as csv
 files and google sheet files, ready to be manually rated using a Shiny
 app.
 
-### 3\. add\_location.R
+### 3\. rate\_evo\_psychs
+
+This is a Shiny App that allows users to manually rate which of multiple
+Twitter users extracted in the script above, if any, is an evolutionary
+psychologist. Users are displayed in a table, together with their
+Twitter name and Twitter bio. The user selects the correct user, or
+skips if none appear to be academics. Results are saved in a
+googlesheets file, which can then be downloaded.
+
+### 4\. add\_location.R
 
 Twitter locations, where they exist, can include countries, cities, or
-suburbs. The Google Maps API is used to standardize location by
-extracting latitude, longitude, and country from location data.
+suburbs. In this script the Google Maps API is used to standardize
+location by extracting latitude, longitude, and country from location
+data.
