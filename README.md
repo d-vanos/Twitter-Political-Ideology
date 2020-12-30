@@ -96,3 +96,30 @@ Twitter locations, where they exist, can include countries, cities, or
 suburbs. In this script the Google Maps API is used to standardize
 location by extracting latitude, longitude, and country from location
 data.
+
+### 5\. match\_users.R
+
+To reduce the likelihood that differences in social networks or
+political ideology of evolutionary psychologists, social psychologists,
+and evolutionary biologists are due to differences in other variables,
+social psychologists and evolutionary biologists were matched to the
+completed and rated list of evolutionary psychologists using optimal
+pair matching. They were matched by country, likely gender, number of
+friends, number of followers, number of twitter posts, and number of
+retweets.
+
+At this stage the list of social psychologists and evolutionary
+biologists has not yet been rated, so not all the Twitter users in this
+list will actually be academics. To account for this, 5 users from each
+list were paired with the evo psych list to ensure that at least one of
+the users will actually be an academic. These are rated in the Shiny app
+below.
+
+### 6\. rate\_evol\_biol & rate\_social\_psychs
+
+These two Shiny apps rate evolutionary biologists and social
+psychologists (similar to rate\_evo\_psychs). From the script above, 5
+potential social psychs and evol biols were matched with each evo psych.
+This app allows you to manually rate which of the 5 options (from
+closest match to least close match), if any, is a social psych or evo
+biologist.
