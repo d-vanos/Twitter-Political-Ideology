@@ -6,7 +6,7 @@ library(tidyverse)
 library(googlesheets4)
 library(ggmap)
 
-register_google(key = "AIzaSyDd2A2sNOFvYqp1TmmnKKqe4hV8MAIbeFk")
+register_google(key = key)
 
 # Download rated data from googlesheets 
 evo_ID <- gs4_find("hbes_3_extract_user")$id
